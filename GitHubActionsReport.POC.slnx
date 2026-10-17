@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Repro/Repro.csproj" />
+    <Project Path="src/Repro2/Repro2.csproj" />
+  </Folder>
+</Solution>

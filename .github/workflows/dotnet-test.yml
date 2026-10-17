@@ -1,0 +1,45 @@
+name: dotnet test (suspect path)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  dotnet-test:
+    name: dotnet test (${{ matrix.scope }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - scope: project
+            command: dotnet test --project src/Repro/Repro.csproj --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
+          - scope: solution
+            command: dotnet test --solution GitHubActionsReport.POC.slnx --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
+          - scope: bare
+            command: dotnet test --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build -c Release
+
+      # Fails() is red on purpose.
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: ${{ matrix.command }} 2>&1 | tee out.txt
+
+      - name: Proof
+        if: always()
+        env:
+          LABEL: dotnet test (${{ matrix.scope }})
+          COMMAND: ${{ matrix.command }}
+        run: ./.github/scripts/proof.sh out.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: out-dotnet-test-${{ matrix.scope }}
+          path: out.txt
