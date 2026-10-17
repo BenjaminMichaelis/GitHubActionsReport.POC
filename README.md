@@ -26,7 +26,7 @@ Each test step `tee`s its combined output to `out.txt` (uploaded as an artifact)
 workflow commands from that same stdout stream, so a command absent from `out.txt` never reached the runner.
 The `failed` test is red on purpose; the test step uses `continue-on-error`.
 
-## Local pre-check (SDK 10.0.402, Windows, `GITHUB_ACTIONS=true`)
+## Local pre-check (SDK 10.0.402, latest packages, Windows, `GITHUB_ACTIONS=true`)
 | Invocation | `::group::` | `::error` | `::warning` (skipped) | `::notice` (slow) | Summary file |
 |---|---|---|---|---|---|
 | exe directly | yes | yes | yes | yes | written |
@@ -34,7 +34,7 @@ The `failed` test is red on purpose; the test step uses `continue-on-error`.
 | `dotnet test --solution` | 0 | 0 | 0 | 0 | written (one section per project) |
 
 ## CI results
-Run on `ubuntu-latest`, SDK 10.0.x. Counts are from the captured stdout ([run: exe-direct](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/38999967966), [run: dotnet-test](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/38999967971)).
+Run on `ubuntu-latest`, .NET 10 SDK (latest 10.0.x), MSTest.Sdk 4.5.1, GitHubActionsReport 2.5.1 (the first run used MSTest.Sdk 4.3.0 / extension 2.4.1 and behaved identically; the re-run on the latest versions below did too). Counts are from the captured stdout ([run: exe-direct](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/39002703257), [run: dotnet-test](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/39002703232)).
 
 | Invocation | `::group::` | `::error` | `::warning` (skipped) | `::notice` (slow) | Job summary | Annotations from the extension |
 |---|---|---|---|---|---|---|
@@ -47,7 +47,10 @@ Solution level behaved the same as project level. The exe-direct control confirm
 (all documented outputs appear), and every `dotnet test` leg drops all of them while still writing the summary.
 
 Two unrelated annotations appear on every job and do not come from the extension: the MSTEST0025 analyzer
-warning on `Tests.cs:12` (from `dotnet build`, via the runner's problem matcher) and runner/Node deprecation notices.
+warning on `Tests.cs:12` (from `dotnet build`, via the runner's problem matcher) and a runner notice that `ubuntu-latest` will move to Ubuntu 26. The `ubuntu-latest` notice shows on every job and is not part of the test.
 
 This matches the hypothesis but does not by itself prove the cause (the passthrough output device);
 that part still rests on reading the testfx source.
+
+## Demo PRs
+One PR per scenario (`demo/exe-direct`, `demo/project`, `demo/solution`, `demo/bare`), each running only its own leg, so the PR's Files changed tab shows just that scenario's annotations. Only `demo/exe-direct` shows annotations on `Tests.cs`. Do not merge them.
