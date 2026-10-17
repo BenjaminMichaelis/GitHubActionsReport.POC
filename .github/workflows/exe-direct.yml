@@ -13,8 +13,8 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || github.head_ref == 'demo/exe-direct' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - run: dotnet build -c Release
@@ -32,7 +32,7 @@ jobs:
           COMMAND: ./src/Repro/bin/Release/net10.0/Repro --report-gh --report-gh-slow-test-threshold 1s
         run: ./.github/scripts/proof.sh out.txt
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: out-exe-direct
