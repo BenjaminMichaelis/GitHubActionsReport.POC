@@ -1,4 +1,4 @@
-<Project Sdk="MSTest.Sdk/4.3.0">
+<Project Sdk="MSTest.Sdk/4.5.1">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="2.5.1" />
   </ItemGroup>
 
 </Project>
