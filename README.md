@@ -34,4 +34,20 @@ The `failed` test is red on purpose; the test step uses `continue-on-error`.
 | `dotnet test --solution` | 0 | 0 | 0 | 0 | written (one section per project) |
 
 ## CI results
-_Filled in after the workflows run._
+Run on `ubuntu-latest`, SDK 10.0.x. Counts are from the captured stdout ([run: exe-direct](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/38999967966), [run: dotnet-test](https://github.com/BenjaminMichaelis/GitHubActionsReport.POC/actions/runs/38999967971)).
+
+| Invocation | `::group::` | `::error` | `::warning` (skipped) | `::notice` (slow) | Job summary | Annotations from the extension |
+|---|---|---|---|---|---|---|
+| exe directly | 1 | 1 | 1 | 2 | written | failed test (`Tests.cs:12`), skipped test (`Tests.cs:14`), 2 slow-test notices |
+| `dotnet test --project` | 0 | 0 | 0 | 0 | written | none |
+| `dotnet test --solution` | 0 | 0 | 0 | 0 | written | none |
+| bare `dotnet test` | 0 | 0 | 0 | 0 | written | none |
+
+Solution level behaved the same as project level. The exe-direct control confirms the repro is valid
+(all documented outputs appear), and every `dotnet test` leg drops all of them while still writing the summary.
+
+Two unrelated annotations appear on every job and do not come from the extension: the MSTEST0025 analyzer
+warning on `Tests.cs:12` (from `dotnet build`, via the runner's problem matcher) and runner/Node deprecation notices.
+
+This matches the hypothesis but does not by itself prove the cause (the passthrough output device);
+that part still rests on reading the testfx source.
