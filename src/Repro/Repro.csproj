@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <!-- Keep analyzer warnings out of the annotations so only --report-gh output is visible. -->
+    <!-- Keep analyzer warnings out of the annotations so only the report-gh extension output is visible. -->
     <NoWarn>$(NoWarn);MSTEST0025</NoWarn>
   </PropertyGroup>
 
