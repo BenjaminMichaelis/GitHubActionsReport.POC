@@ -9,9 +9,9 @@ public class Tests
     public void Passes() { }
 
     [TestMethod]
-    public void Fails() => Assert.AreEqual(1, 2);
+    public void Fails() => Assert.AreEqual(1, 2); // demo: exe-direct
 
-    [TestMethod]
+    [TestMethod] // demo: exe-direct
     [Ignore("Skipped on purpose: the GitHub Actions report should annotate skipped tests")]
     public void Skipped() { }
 
