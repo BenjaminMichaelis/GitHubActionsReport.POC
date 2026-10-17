@@ -2,11 +2,15 @@ name: test exe direct (control)
 
 on:
   push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
   exe-direct:
     name: test exe direct
+    # On a pull request only the demo/exe-direct branch runs this, so each demo PR isolates one scenario.
+    if: ${{ github.event_name != 'pull_request' || github.head_ref == 'demo/exe-direct' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

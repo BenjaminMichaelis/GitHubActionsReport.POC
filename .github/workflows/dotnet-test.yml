@@ -2,22 +2,45 @@ name: dotnet test (suspect path)
 
 on:
   push:
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 jobs:
+  plan:
+    # On main / manual runs every scope runs. On a pull request from a `demo/<scope>`
+    # branch only that scope runs, so the PR's Files changed tab shows just that scenario.
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          all='[
+            {"scope":"project","command":"dotnet test --project src/Repro/Repro.csproj --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s"},
+            {"scope":"solution","command":"dotnet test --solution GitHubActionsReport.POC.slnx --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s"},
+            {"scope":"bare","command":"dotnet test --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s"}
+          ]'
+          if [[ "$EVENT" == "pull_request" && "$HEAD_REF" == demo/* ]]; then
+            scope="${HEAD_REF#demo/}"
+            matrix=$(jq -c --arg s "$scope" '[.[] | select(.scope == $s)]' <<<"$all")
+          else
+            matrix=$(jq -c . <<<"$all")
+          fi
+          echo "matrix={\"include\":$matrix}" >> "$GITHUB_OUTPUT"
+
   dotnet-test:
     name: dotnet test (${{ matrix.scope }})
+    needs: plan
+    # Skip when a demo/<other> PR (e.g. demo/exe-direct) selected no dotnet-test scope.
+    if: ${{ toJSON(fromJSON(needs.plan.outputs.matrix).include) != '[]' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - scope: project
-            command: dotnet test --project src/Repro/Repro.csproj --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
-          - scope: solution
-            command: dotnet test --solution GitHubActionsReport.POC.slnx --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
-          - scope: bare
-            command: dotnet test --no-build -c Release --report-gh --report-gh-slow-test-threshold 1s
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
